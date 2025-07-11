@@ -9,15 +9,22 @@
 </script>
 
 <div class="container mx-auto px-4 py-8">
+    
     <section class="mb-16 text-center">
         <h1 class="mb-3 text-4x1 font-bold md:text-5x1">{data.title}</h1>
     </section>
+
     <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
         {#each data.posts.posts as post}
             <data.component post={post} />
         {/each}
     </div>
-    <div class="flex justify-end">
+
+    <div class="flex no-js:hidden mt-10 justify-center">
+        <button class="btn btn-outline">Load More</button>
+    </div>
+
+    <div class="no-js:flex hidden justify-end">
         <div class="join mt-10 grid w-full max-w-[500px] grid-cols-2 gap-4" >
             {#if currentPage > 1}
                 <a href="/blog?page={currentPage - 1}" class="join-item btn btn-outline">Previous page</a>
