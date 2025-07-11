@@ -1,11 +1,26 @@
 <script lang="ts">
 	import { page } from "$app/state";
 	import { POSTS_PER_PAGE } from "$lib/constants";
+	import type { PostsResponse } from "$lib/types";
 	import type { PageProps } from "./$types";
 
     let { data }: PageProps = $props();
 
+    let posts = $derived(data.posts.posts);
+
     let currentPage = $derived(+(page.url.searchParams.get('page') ?? 1));
+
+    let isLoading = $state(false);
+    let lastLoadedPage = $derived(currentPage);
+
+    async function loadMorePosts() {
+        isLoading = true;
+        const newPostsRes = await fetch(`https://dummyjson.com/posts?limit=${POSTS_PER_PAGE}&skip=${(lastLoadedPage) * POSTS_PER_PAGE}`);
+        const newPostsJSON: PostsResponse = await newPostsRes.json();
+        posts = [...posts, ...newPostsJSON.posts];
+        lastLoadedPage = newPostsJSON.skip / POSTS_PER_PAGE + 1;
+        isLoading = false;
+    }
 </script>
 
 <div class="container mx-auto px-4 py-8">
@@ -15,13 +30,17 @@
     </section>
 
     <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {#each data.posts.posts as post}
+        {#each posts as post}
             <data.component post={post} />
         {/each}
     </div>
 
     <div class="flex no-js:hidden mt-10 justify-center">
-        <button class="btn btn-outline">Load More</button>
+        {#if Math.ceil(data.posts.total / POSTS_PER_PAGE) !== lastLoadedPage}
+            <button disabled={isLoading} class="btn btn-outline" onclick={loadMorePosts}>Load More</button>
+        {:else}
+            <p>No more posts to load.</p>
+        {/if}
     </div>
 
     <div class="no-js:flex hidden justify-end">
