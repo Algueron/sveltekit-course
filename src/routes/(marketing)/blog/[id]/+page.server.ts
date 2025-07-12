@@ -18,10 +18,13 @@ export const load = (async ({ params, fetch }) => {
         return commentsArray;
     }
 
-    const [post, comments] = await Promise.all([fetchPost(), fetchComments()]);
-
+    // Always start with promises for streaming
+    const commentsPromise = fetchComments();
+    const post = await fetchPost();
     return {
-        post: post,
-        comments: comments
+        comments: commentsPromise,
+        post,
+        title: post.title,
+        description: post.body.slice(0, 200)
     };
 });
